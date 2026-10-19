@@ -1,0 +1,24 @@
+name: check
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  authentik:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: authentik
+    steps:
+      - uses: actions/checkout@v4
+      - uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: ${{ vars.OPENTOFU_VERSION || '1.12.6' }}
+      - name: Check
+        run: make check
