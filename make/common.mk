@@ -1,14 +1,3 @@
-# Shared OpenTofu targets for an infra root. Include from a per-root Makefile:
-#
-#   ROOT_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
-#   include $(ROOT_DIR)/../make/common.mk
-#
-# A plain cloud root needs nothing more. Roots with extras set these BEFORE the
-# include and/or add their own targets:
-#   TF_DIR     - dir to run tofu in            (default: ROOT_DIR)
-#   TEST_DIRS  - dirs to `tofu test`           (default: TF_DIR; skipped if no *.tftest.hcl)
-#   PREFLIGHT  - prereqs for state operations (default: creds-preflight)
-#   TF_PRELUDE - shell run before state ops     (default: true; e.g. `source .env`)
 SHELL := /bin/bash
 .SHELLFLAGS := -eu -o pipefail -c
 
@@ -86,14 +75,7 @@ validate: version-check
 	TF_DATA_DIR="$(TF_DIR)/.terraform-check" TF_PLUGIN_CACHE_DIR="$(PLUGIN_CACHE_DIR)" "$(TF)" -chdir="$(TF_DIR)" init -backend=false -lockfile=readonly $$get >/dev/null
 	@TF_DATA_DIR="$(TF_DIR)/.terraform-check" TF_PLUGIN_CACHE_DIR="$(PLUGIN_CACHE_DIR)" "$(TF)" -chdir="$(TF_DIR)" validate
 
-# Run tofu test in each TEST_DIRS entry that actually has *.tftest.hcl (top level
-# or tests/), so roots with no tests are a clean no-op.
-#
-# The leading `set -eu -o pipefail` is not redundant with .SHELLFLAGS above:
-# macOS ships GNU Make 3.81, which predates .SHELLFLAGS (3.82) and silently
-# ignores it. Without this, a failing `tofu test` is swallowed and `make check`
-# reports success. CI never calls make (it drives tofu directly), so this
-# footgun is entirely a local-macOS one — which is exactly where it bites.
+# GNU Make 3.81 ignores .SHELLFLAGS, so this recipe sets the shell flags itself.
 test: version-check
 	@mkdir -p "$(PLUGIN_CACHE_DIR)"
 	@set -eu -o pipefail; for d in $(TEST_DIRS); do \
@@ -110,19 +92,6 @@ test: version-check
 check: version-check fmt-check validate test
 	@printf 'All static checks passed.\n'
 
-# Cloud roots authenticate via Application Default Credentials (the google/vault
-# providers read Secret Manager at plan time). Fail early with a clear message.
-#
-# This is a convenience for humans: CI drives tofu directly and gets its
-# credentials from google-github-actions/auth, so no CI job reaches this target.
-#
-# GOOGLE_APPLICATION_CREDENTIALS still short-circuits the rest, because the
-# providers' Go client reads that file directly and it is valid ADC on a machine
-# with no gcloud at all. Only the interactive
-# `gcloud auth application-default login` path needs the binary.
-#
-# One recipe line, not three: macOS make 3.81 ignores the .SHELLFLAGS above, so
-# each line would run without -e. See the note on `test`.
 creds-preflight:
 	@if [ -r "$${GOOGLE_APPLICATION_CREDENTIALS:-}" ]; then exit 0; fi; \
 	if ! command -v gcloud >/dev/null 2>&1; then \
