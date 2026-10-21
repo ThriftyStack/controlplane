@@ -22,3 +22,12 @@ jobs:
           tofu_version: ${{ vars.OPENTOFU_VERSION || '1.12.6' }}
       - name: Check
         run: make check
+  deploy:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check
+        run: |
+          python3 -m venv /tmp/deploy-check
+          /tmp/deploy-check/bin/pip install pyyaml
+          PATH="/tmp/deploy-check/bin:$PATH" make -C deploy check

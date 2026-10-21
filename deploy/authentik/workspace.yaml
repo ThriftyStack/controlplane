@@ -1,0 +1,29 @@
+apiVersion: opentofu.upbound.io/v1beta1
+kind: Workspace
+metadata:
+  name: authentik
+  annotations:
+    crossplane.io/external-name: authentik
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+spec:
+  deletionPolicy: Orphan
+  managementPolicies:
+    - Observe
+    - Create
+    - Update
+  providerConfigRef:
+    name: authentik
+  forProvider:
+    source: Remote
+    module: git::https://github.com/ThriftyStack/controlplane.git?ref=main
+    entrypoint: authentik
+    remotePullPolicy: Always
+    env:
+      - name: GOOGLE_APPLICATION_CREDENTIALS
+        value: gcp-credentials.json
+    vars:
+      - key: vault_addr
+        value: https://vault.vault.svc:8200
+  writeConnectionSecretToRef:
+    name: authentik-workspace
+    namespace: crossplane-system

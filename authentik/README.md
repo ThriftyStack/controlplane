@@ -9,8 +9,5 @@ Group names follow [ADR-0001](https://github.com/ThriftyStack/docs/blob/main/adr
 Auth chain: ADC → Secret Manager Vault token → Vault `infra/authentik` key
 `tofu-api-token` → Authentik API.
 
-```sh
-make check
-make plan
-make apply
-```
+Crossplane Workspace `authentik` applies this directory. Local validation is
+`make check`. The Workspace sets `vault_addr` to the in-cluster Vault service.
