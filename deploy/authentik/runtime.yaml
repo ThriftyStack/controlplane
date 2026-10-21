@@ -1,0 +1,63 @@
+# provider-opentofu v1.1.10 ships OpenTofu 1.10.8. Ephemeral resources need the
+# CLI pinned in .opentofu-version, so the init container replaces that binary.
+apiVersion: pkg.crossplane.io/v1beta1
+kind: DeploymentRuntimeConfig
+metadata:
+  name: provider-opentofu
+spec:
+  serviceAccountTemplate:
+    metadata:
+      name: provider-opentofu
+  deploymentTemplate:
+    spec:
+      selector: {}
+      template:
+        spec:
+          initContainers:
+            - name: pin-opentofu
+              image: ghcr.io/opentofu/opentofu:1.12.6@sha256:22cb52f6c5bf5c72a48a8f56d993d8df3e9462b1cdfb5db7e77143c87e8d159f
+              command: ["/bin/sh", "-c"]
+              args:
+                - cp /usr/local/bin/tofu /opt/tofu/tofu && chmod 755 /opt/tofu/tofu
+              volumeMounts:
+                - name: tofu-bin
+                  mountPath: /opt/tofu
+          containers:
+            - name: package-runtime
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 256Mi
+                limits:
+                  memory: 1Gi
+              env:
+                - name: VAULT_CACERT
+                  value: /etc/vault-tls/ca.crt
+              volumeMounts:
+                - name: tofu-bin
+                  mountPath: /usr/local/bin/tofu
+                  subPath: tofu
+                - name: vault-bootstrap-ca
+                  mountPath: /etc/vault-tls
+                  readOnly: true
+          volumes:
+            - name: tofu-bin
+              emptyDir: {}
+            - name: vault-bootstrap-ca
+              configMap:
+                name: vault-bootstrap-ca
+                optional: true
+---
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: provider-opentofu
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+    thriftystack.io/package-version: v1.1.10
+spec:
+  package: xpkg.upbound.io/upbound/provider-opentofu:v1.1.10
+  revisionActivationPolicy: Automatic
+  revisionHistoryLimit: 1
+  runtimeConfigRef:
+    name: provider-opentofu

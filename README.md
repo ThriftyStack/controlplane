@@ -8,6 +8,7 @@ bootstraps and are not general infrastructure roots.
 | Area | Purpose | Local validation |
 | --- | --- | --- |
 | [`authentik/`](authentik/) | Authentik groups, entitlements, and OAuth2 applications | `make -C authentik check` |
+| [`deploy/authentik/`](deploy/authentik/) | Crossplane Workspace that applies `authentik/` | `make -C deploy check` |
 
 Host runtime for Authentik (Compose, TLS, secrets wiring) lives in
 [`ansible/deployments`](https://github.com/ThriftyStack/ansible). Proxmox VM,
@@ -40,16 +41,24 @@ applications. Ansible must not reconcile those objects.
      authentik-client-id=proxmox authentik="$(openssl rand -hex 32)"
    ```
 
-4. Application Default Credentials that can read the Vault token from Secret
-   Manager, plus LAN, WARP, or NetBird reachability to Authentik.
+4. Create the two secrets in `crossplane-system` named by
+   [`deploy/authentik/providerconfig.yaml`](deploy/authentik/providerconfig.yaml).
+   The git secret reads this private repository. The GCP secret is the key
+   the Workspace uses for Secret Manager and the GCS state backend.
+5. Argo CD on the management cluster sources `deploy/authentik`. The management
+   AppProject must allow `https://github.com/ThriftyStack/controlplane.git`.
 
 ### Operate
 
+Crossplane Workspace `authentik` applies this root from inside the management
+cluster. Local validation stays:
+
 ```sh
 make -C authentik check
-make -C authentik plan
-make -C authentik apply
+make -C deploy check
 ```
 
 State is GCS under prefix `controlplane/authentik`. OpenTofu is pinned in
-[`.opentofu-version`](.opentofu-version).
+[`.opentofu-version`](.opentofu-version). The provider image ships an older
+CLI, and [`deploy/authentik/runtime.yaml`](deploy/authentik/runtime.yaml)
+replaces it with that pin before tofu runs.

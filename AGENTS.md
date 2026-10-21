@@ -41,6 +41,8 @@ state, plan files, `.terraform/`, generated credentials, or `.env` files.
 
 - This repository owns Authentik **identity configuration** (groups, apps,
   entitlements, bindings).
+- The management cluster Crossplane applies that configuration. Do not apply
+  it from a workstation.
 - `ansible/deployments` owns the Authentik **runtime stack**.
 - `terraform` owns the Authentik **VM, DNS, and tunnel**.
 - Do not put Authentik identity OpenTofu back into `terraform/` or `bootstrap/`.
