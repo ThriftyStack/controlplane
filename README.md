@@ -1,3 +1,5 @@
+# controlplane
+
 # Control plane
 
 OpenTofu configuration for estate control-plane services that are not host
