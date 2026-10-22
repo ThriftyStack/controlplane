@@ -18,7 +18,8 @@ day-0 stays in [`bootstrap`](https://github.com/ThriftyStack/bootstrap).
 
 ## Authentik identity
 
-[`authentik/`](authentik/) is the source of truth for ADR-0001 groups
+[`authentik/`](authentik/) is the source of truth for the
+[ADR-0001](https://www.notion.so/400972443c708191aafbc0a9a1f7dc8a) groups
 (`homelab-users`, `homelab-admins`) and the Grafana, Vault, and Proxmox OIDC
 applications. Ansible must not reconcile those objects.
 
