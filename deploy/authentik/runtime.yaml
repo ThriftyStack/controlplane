@@ -13,6 +13,7 @@ spec:
       selector: {}
       template:
         spec:
+          serviceAccountName: provider-opentofu
           initContainers:
             - name: pin-opentofu
               image: ghcr.io/opentofu/opentofu:1.12.6@sha256:22cb52f6c5bf5c72a48a8f56d993d8df3e9462b1cdfb5db7e77143c87e8d159f
@@ -40,6 +41,9 @@ spec:
                 - name: vault-bootstrap-ca
                   mountPath: /etc/vault-tls
                   readOnly: true
+                - name: vault-auth
+                  mountPath: /var/run/vault-auth
+                  readOnly: true
           volumes:
             - name: tofu-bin
               emptyDir: {}
@@ -47,6 +51,14 @@ spec:
               configMap:
                 name: vault-bootstrap-ca
                 optional: true
+            # Audience matches the management Vault role authentik-tofu.
+            - name: vault-auth
+              projected:
+                sources:
+                  - serviceAccountToken:
+                      audience: vault://crossplane-system/authentik-tofu
+                      expirationSeconds: 3600
+                      path: token
 ---
 apiVersion: pkg.crossplane.io/v1
 kind: Provider

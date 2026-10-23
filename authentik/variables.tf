@@ -1,19 +1,7 @@
-variable "project_id" {
-  description = "GCP project holding the Secret Manager secret with the Vault token."
-  type        = string
-  default     = "project-d10f7f85-317f-426a-a46"
-}
-
 variable "vault_addr" {
-  description = "Vault address from which the Authentik API token is read."
+  description = "Vault address the provider logs in to. The Workspace overrides this with the in-cluster management Vault."
   type        = string
   default     = "https://vault.devoops.uk"
-}
-
-variable "vault_token_secret" {
-  description = "Secret Manager resource holding the Vault token; the latest version is used."
-  type        = string
-  default     = "projects/30505601645/secrets/vault-token"
 }
 
 variable "vault_secret_mount" {

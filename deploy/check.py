@@ -62,10 +62,69 @@ def main():
     vault = {item["key"]: item["value"] for item in module["vars"]}
     if vault.get("vault_addr") != "https://vault.vault.svc:8200":
         raise SystemExit("in-cluster Vault address changed")
+    if any("vault_token" in key or "vault-token" in str(value) for key, value in vault.items()):
+        raise SystemExit("Workspace vars must not reference a static Vault token")
     if "<token>" not in example or example.startswith("https://x-access-token:@"):
         raise SystemExit("git credential example lost its placeholder")
 
+    assert_vault_kubernetes_auth(runtime)
+    assert_no_static_vault_token(
+        DEPLOY / "runtime.yaml",
+        DEPLOY / "providerconfig.yaml",
+        DEPLOY / "workspace.yaml",
+        DEPLOY / "README.md",
+        ROOT / "authentik" / "providers.tf",
+        ROOT / "authentik" / "variables.tf",
+        ROOT / "authentik" / "versions.tf",
+    )
+
     print("deploy checks passed")
+
+
+def assert_vault_kubernetes_auth(runtime):
+    pod = runtime["spec"]["deploymentTemplate"]["spec"]["template"]["spec"]
+    sa = runtime["spec"]["serviceAccountTemplate"]["metadata"]["name"]
+    if sa != "provider-opentofu" or pod.get("serviceAccountName") != "provider-opentofu":
+        raise SystemExit("provider pod service account must be provider-opentofu")
+
+    auth = next((item for item in pod["volumes"] if item["name"] == "vault-auth"), None)
+    if auth is None or "projected" not in auth:
+        raise SystemExit("vault-auth projected volume missing")
+    sources = auth["projected"]["sources"]
+    token = next(
+        (item["serviceAccountToken"] for item in sources if "serviceAccountToken" in item),
+        None,
+    )
+    if token is None:
+        raise SystemExit("vault-auth service account token missing")
+    if token.get("audience") != "vault://crossplane-system/authentik-tofu":
+        raise SystemExit("vault-auth audience mismatch")
+    if token.get("path") != "token" or int(token.get("expirationSeconds", 0)) != 3600:
+        raise SystemExit("vault-auth token path or expiration changed")
+
+    container = next(item for item in pod["containers"] if item["name"] == "package-runtime")
+    mount = next((item for item in container["volumeMounts"] if item["name"] == "vault-auth"), None)
+    if (
+        mount is None
+        or mount.get("mountPath") != "/var/run/vault-auth"
+        or mount.get("readOnly") is not True
+    ):
+        raise SystemExit("vault-auth must be mounted read-only at /var/run/vault-auth")
+
+    providers = (ROOT / "authentik" / "providers.tf").read_text()
+    if 'path = "auth/kubernetes-management/login"' not in providers:
+        raise SystemExit("Vault provider must log in through kubernetes-management")
+    if 'role = "authentik-tofu"' not in providers or 'try(file("/var/run/vault-auth/token"), "")' not in providers:
+        raise SystemExit("Vault Kubernetes login parameters changed")
+    if 'provider "google"' in providers or "hashicorp/google" in (ROOT / "authentik" / "versions.tf").read_text():
+        raise SystemExit("google provider is unused")
+
+
+def assert_no_static_vault_token(*paths):
+    for path in paths:
+        text = path.read_text()
+        if "vault-token" in text or "vault_token_secret" in text:
+            raise SystemExit(f"{path.relative_to(ROOT)} still references a static Vault token")
 
 
 if __name__ == "__main__":

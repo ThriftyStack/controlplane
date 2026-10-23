@@ -1,15 +1,19 @@
-# Ephemeral reads and the provider sink keep both tokens out of state and plans.
-provider "google" {
-  project = var.project_id
-}
-
-ephemeral "google_secret_manager_secret_version" "vault_token" {
-  secret = var.vault_token_secret
-}
-
+# Kubernetes login reads the projected service account token at runtime.
+# OpenTofu evaluates file() during validate, which runs outside the pod, so
+# try() keeps that check hermetic. When the token is mounted, file() returns
+# it; when it is not, the login JWT is empty and Vault rejects it.
+# The Authentik API token stays an ephemeral read so it never lands in state.
 provider "vault" {
   address = var.vault_addr
-  token   = ephemeral.google_secret_manager_secret_version.vault_token.secret_data
+
+  auth_login {
+    path = "auth/kubernetes-management/login"
+
+    parameters = {
+      role = "authentik-tofu"
+      jwt  = try(file("/var/run/vault-auth/token"), "")
+    }
+  }
 }
 
 ephemeral "vault_kv_secret_v2" "authentik" {

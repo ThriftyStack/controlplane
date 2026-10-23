@@ -44,8 +44,9 @@ applications. Ansible must not reconcile those objects.
 
 4. Create the two secrets in `crossplane-system` named by
    [`deploy/authentik/providerconfig.yaml`](deploy/authentik/providerconfig.yaml).
-   The git secret reads this private repository. The GCP secret is the key
-   the Workspace uses for Secret Manager and the GCS state backend.
+   This repository is public, so `authentik-git-credentials` can be mounted
+   from an empty file. The GCP secret is the key the Workspace uses for the
+   GCS state backend.
 5. Argo CD on the management cluster sources `deploy/authentik`. The management
    AppProject must allow `https://github.com/ThriftyStack/controlplane.git`.
 
