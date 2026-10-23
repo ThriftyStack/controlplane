@@ -8,16 +8,13 @@ terraform {
       source  = "goauthentik/authentik"
       version = "2026.5.1"
     }
-    google = {
-      source  = "hashicorp/google"
-      version = "~> 7.0"
-    }
     vault = {
       source  = "hashicorp/vault"
       version = "~> 5.0"
     }
   }
 
+  # The Workspace GCP key supplies GOOGLE_APPLICATION_CREDENTIALS for this backend.
   backend "gcs" {
     bucket = "project-d10f7f85-317f-426a-a46-tofu-state"
     prefix = "controlplane/authentik"

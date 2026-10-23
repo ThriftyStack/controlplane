@@ -6,11 +6,16 @@ Workspace in this directory. OpenTofu state stays in the GCS prefix
 
 ## Secrets
 
-Create both secrets in `crossplane-system` before the Workspace can run.
-Use a GitHub credential that can read this private repository, and a GCP key
-that can read Secret Manager and the state bucket.
+This repository is public. Create both secrets in `crossplane-system` before
+the Workspace can run. `authentik-git-credentials` is mounted as
+`.git-credentials` and can be created from an empty file. The GCP key reads
+the state bucket `project-d10f7f85-317f-426a-a46-tofu-state`.
+
+The provider pod runs as service account `provider-opentofu` and logs in to
+the management Vault with the projected token at `/var/run/vault-auth/token`.
 
 ```sh
+touch git-credentials
 kubectl create secret generic authentik-git-credentials \
   --namespace crossplane-system \
   --from-file=.git-credentials=git-credentials
@@ -19,8 +24,8 @@ kubectl create secret generic authentik-gcp-credentials \
   --from-file=credentials=gcp-credentials.json
 ```
 
-`git-credentials` has one line. Copy `git-credentials.example` and replace the
-placeholder. Do not commit the filled file.
+`git-credentials.example` is the shape of a credential line if one is required
+later. Do not commit a filled file.
 
 ## Argo CD
 
