@@ -25,7 +25,8 @@ applications. Ansible must not reconcile those objects.
 
 ### Prerequisites
 
-1. Authentik is up at `https://auth.devoops.uk` (ansible `authentik.yml`).
+1. Authentik runtime is up at `https://auth.devoops.uk` (platform Helm chart
+   `infrastructure/charts/authentik`, ADR-0007).
 2. Complete initial setup once, create an API token, and store it:
 
    ```bash

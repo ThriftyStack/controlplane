@@ -44,8 +44,9 @@ state, plan files, `.terraform/`, generated credentials, or `.env` files.
   entitlements, bindings).
 - The management cluster Crossplane applies that configuration. Do not apply
   it from a workstation.
-- `ansible/deployments` owns the Authentik **runtime stack**.
-- `terraform` owns the Authentik **VM, DNS, and tunnel**.
+- `ThriftyStack/platform` owns the Authentik **runtime** Helm chart
+  (`infrastructure/charts/authentik`, ADR-0007).
+- `terraform` owns Authentik **DNS and tunnel** targets (not the retired VM).
 - Do not put Authentik identity OpenTofu back into `terraform/` or `bootstrap/`.
 
 ## Commits
