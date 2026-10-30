@@ -21,9 +21,17 @@ spec:
     env:
       - name: GOOGLE_APPLICATION_CREDENTIALS
         value: gcp-credentials.json
+      # Cluster DNS resolves auth.devoops.uk to the LAN node IP (no :443). Use the
+      # in-cluster Service and skip its self-signed TLS for the provider API client.
+      - name: AUTHENTIK_URL
+        value: https://authentik-server.authentik.svc
+      - name: AUTHENTIK_INSECURE
+        value: "true"
     vars:
       - key: vault_addr
         value: https://vault.vault.svc:8200
+      - key: authentik_url
+        value: https://authentik-server.authentik.svc
   writeConnectionSecretToRef:
     name: authentik-workspace
     namespace: crossplane-system
