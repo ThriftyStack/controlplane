@@ -11,9 +11,9 @@ outpost `oke`.
 
 `adoption_ids` is required and is not in `terraform.tfvars`. The Workspace plan
 fails until it holds the live Proxmox entitlement uuid, Longhorn provider pk,
-and `oke` outpost uuid. That failure happens before create or destroy. Proxy
-entitlements, if added, need the same treatment in
-`proxy_entitlement_adoption_ids`.
+and `oke` outpost uuid. That failure happens before create or destroy. Longhorn
+has no entitlements. Its external host is `https://longhorn.oci.devoops.uk`,
+and the `oke` outpost `authentik_host` is `https://auth.devoops.uk`.
 
 Auth chain: projected service account token → Vault Kubernetes auth role
 `authentik-tofu` on mount `kubernetes-management` → Vault `infra/authentik`

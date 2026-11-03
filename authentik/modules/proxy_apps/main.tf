@@ -14,14 +14,16 @@ variable "apps" {
     name          = string
     group         = string
     external_host = string
+    internal_host = string
     entitlements  = optional(map(string), {})
   }))
 }
 
 variable "outposts" {
   type = map(object({
-    name      = string
-    providers = list(string)
+    name           = string
+    authentik_host = string
+    providers      = list(string)
   }))
 }
 
@@ -46,16 +48,15 @@ resource "authentik_provider_proxy" "this" {
 
   name               = each.value.name
   external_host      = each.value.external_host
+  internal_host      = each.value.internal_host
   authorization_flow = data.authentik_flow.authorization[0].id
   invalidation_flow  = data.authentik_flow.invalidation[0].id
 
-  # mode and internal_host are whatever the live proxy already uses. The
-  # provider default for mode is proxy, which would retarget the outpost if
-  # the live value differs. The other ignored arguments have the same problem.
+  # mode defaults to proxy and would retarget the outpost if the live value
+  # differs. The other ignored arguments have the same problem.
   lifecycle {
     ignore_changes = [
       mode,
-      internal_host,
       access_token_validity,
       refresh_token_validity,
       intercept_header_auth,
@@ -106,11 +107,16 @@ resource "authentik_outpost" "this" {
   protocol_providers = [
     for key in each.value.providers : tonumber(authentik_provider_proxy.this[key].id)
   ]
+  # The API stores this object as given and returns it unchanged. The verified
+  # legacy tfvars set authentik_host and no other config key.
+  config = jsonencode({
+    authentik_host = each.value.authentik_host
+  })
 
-  # config is generated. service_connection is the live OKE kube connection;
-  # clearing it would delete the outpost Deployment.
+  # service_connection is the live OKE kube connection. Clearing it deletes
+  # the outpost Deployment.
   lifecycle {
-    ignore_changes = [service_connection, config]
+    ignore_changes = [service_connection]
   }
 }
 

@@ -36,13 +36,15 @@ run "adopts_longhorn_and_oke" {
       longhorn = {
         name          = "Longhorn"
         group         = "Infrastructure"
-        external_host = "https://longhorn.k8s.devoops.uk"
+        external_host = "https://longhorn.oci.devoops.uk"
+        internal_host = "http://longhorn-frontend.longhorn-system.svc.cluster.local"
       }
     }
     outposts = {
       oke = {
-        name      = "oke"
-        providers = ["longhorn"]
+        name           = "oke"
+        authentik_host = "https://auth.devoops.uk"
+        providers      = ["longhorn"]
       }
     }
   }
@@ -50,7 +52,8 @@ run "adopts_longhorn_and_oke" {
   assert {
     condition = alltrue([
       authentik_provider_proxy.this["longhorn"].name == "Longhorn",
-      authentik_provider_proxy.this["longhorn"].external_host == "https://longhorn.k8s.devoops.uk",
+      authentik_provider_proxy.this["longhorn"].external_host == "https://longhorn.oci.devoops.uk",
+      authentik_provider_proxy.this["longhorn"].internal_host == "http://longhorn-frontend.longhorn-system.svc.cluster.local",
       authentik_provider_proxy.this["longhorn"].authorization_flow == "flow-1",
       authentik_provider_proxy.this["longhorn"].invalidation_flow == "flow-1",
       authentik_application.this["longhorn"].slug == "longhorn",
@@ -58,6 +61,7 @@ run "adopts_longhorn_and_oke" {
       authentik_application.this["longhorn"].protocol_provider == 7,
       authentik_outpost.this["oke"].name == "oke",
       authentik_outpost.this["oke"].protocol_providers == tolist([7]),
+      jsondecode(authentik_outpost.this["oke"].config).authentik_host == "https://auth.devoops.uk",
       length(authentik_application_entitlement.this) == 0,
     ])
     error_message = "Longhorn proxy, its application, and the oke outpost must keep the adopted names and hosts."
@@ -72,7 +76,8 @@ run "keeps_entitlement_name" {
       longhorn = {
         name          = "Longhorn"
         group         = "Infrastructure"
-        external_host = "https://longhorn.k8s.devoops.uk"
+        external_host = "https://longhorn.oci.devoops.uk"
+        internal_host = "http://longhorn-frontend.longhorn-system.svc.cluster.local"
         entitlements = {
           longhorn_admins = "longhorn-admins"
         }

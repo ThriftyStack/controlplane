@@ -132,6 +132,7 @@ variable "proxy_apps" {
     name          = string
     group         = string
     external_host = string
+    internal_host = string
     entitlements  = optional(map(string), {})
   }))
 
@@ -141,9 +142,10 @@ variable "proxy_apps" {
       trimspace(app.name) != "",
       trimspace(app.group) != "",
       trimspace(app.external_host) != "",
+      trimspace(app.internal_host) != "",
       alltrue([for key, name in app.entitlements : trimspace(key) != "" && trimspace(name) != ""]),
     ])])
-    error_message = "Each proxy application needs a slug, name, group, external host, and non-empty entitlement names."
+    error_message = "Each proxy application needs a slug, name, group, external host, internal host, and non-empty entitlement names."
   }
 
   validation {
@@ -161,25 +163,21 @@ variable "proxy_apps" {
 variable "outposts" {
   description = "Proxy outposts keyed by configuration name. providers lists proxy_apps keys, in outpost order."
   type = map(object({
-    name      = string
-    providers = list(string)
+    name           = string
+    authentik_host = string
+    providers      = list(string)
   }))
 
   validation {
     condition = alltrue([for key, outpost in var.outposts : alltrue([
       trimspace(key) != "",
       trimspace(outpost.name) != "",
+      trimspace(outpost.authentik_host) != "",
       length(outpost.providers) > 0,
       alltrue([for provider in outpost.providers : contains(keys(var.proxy_apps), provider)]),
     ])])
-    error_message = "Each outpost needs a name and at least one proxy application key."
+    error_message = "Each outpost needs a name, authentik_host, and at least one proxy application key."
   }
-}
-
-variable "proxy_entitlement_adoption_ids" {
-  description = "Live pbm uuid keyed by proxy entitlement configuration key. Every proxy entitlement must have one so apply imports it instead of creating a second entitlement."
-  type        = map(string)
-  default     = {}
 }
 
 variable "adoption_ids" {

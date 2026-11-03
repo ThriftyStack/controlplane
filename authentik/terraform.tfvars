@@ -59,20 +59,21 @@ oauth2_apps = {
   }
 }
 
-# external_host is the Longhorn UI probe. mode and internal_host stay
-# ignore_changes on the provider so adopt does not retarget the backend.
+# Hosts match the legacy authentik tfvars. Longhorn has no entitlements.
 proxy_apps = {
   longhorn = {
     name          = "Longhorn"
     group         = "Infrastructure"
-    external_host = "https://longhorn.k8s.devoops.uk"
+    external_host = "https://longhorn.oci.devoops.uk"
+    internal_host = "http://longhorn-frontend.longhorn-system.svc.cluster.local"
   }
 }
 
 outposts = {
   oke = {
-    name      = "oke"
-    providers = ["longhorn"]
+    name           = "oke"
+    authentik_host = "https://auth.devoops.uk"
+    providers      = ["longhorn"]
   }
 }
 
