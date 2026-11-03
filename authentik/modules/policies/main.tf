@@ -13,6 +13,10 @@ variable "application_ids" {
   type = map(string)
 }
 
+variable "proxy_application_ids" {
+  type = map(string)
+}
+
 variable "entitlement_ids" {
   type = map(string)
 }
@@ -46,6 +50,7 @@ variable "bindings" {
 locals {
   targets = merge(
     { for key, id in var.application_ids : "oauth2_app:${key}" => id },
+    { for key, id in var.proxy_application_ids : "proxy_app:${key}" => id },
     { for key, id in var.entitlement_ids : "entitlement:${key}" => id },
   )
 }

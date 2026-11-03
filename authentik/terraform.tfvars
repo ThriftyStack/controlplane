@@ -46,12 +46,33 @@ oauth2_apps = {
   proxmox = {
     name   = "Proxmox"
     group  = "Infrastructure"
-    scopes = ["openid", "profile", "email"]
+    scopes = ["openid", "profile", "email", "groups"]
     redirects = [
       { matching_mode = "strict", url = "https://pve.adminio.biz:8006", redirect_uri_type = "authorization" },
     ]
     client_id     = { path = "proxmox-oidc", key = "authentik-client-id" }
     client_secret = { path = "proxmox-oidc", key = "authentik" }
+    # PVE maps this groups-claim value to group proxmox-admins-authentik.
+    entitlements = {
+      proxmox_admins = "proxmox-admins"
+    }
+  }
+}
+
+# external_host is the Longhorn UI probe. mode and internal_host stay
+# ignore_changes on the provider so adopt does not retarget the backend.
+proxy_apps = {
+  longhorn = {
+    name          = "Longhorn"
+    group         = "Infrastructure"
+    external_host = "https://longhorn.k8s.devoops.uk"
+  }
+}
+
+outposts = {
+  oke = {
+    name      = "oke"
+    providers = ["longhorn"]
   }
 }
 
@@ -61,6 +82,8 @@ bindings = {
   grafana         = { target_type = "oauth2_app", target = "grafana", subject_type = "group", subject = "homelab_users" }
   vault           = { target_type = "oauth2_app", target = "vault", subject_type = "group", subject = "homelab_admins" }
   proxmox         = { target_type = "oauth2_app", target = "proxmox", subject_type = "group", subject = "homelab_admins" }
+  proxmox_admins  = { target_type = "entitlement", target = "proxmox_admins", subject_type = "group", subject = "homelab_admins" }
+  longhorn        = { target_type = "proxy_app", target = "longhorn", subject_type = "group", subject = "homelab_admins" }
   grafana_admins  = { target_type = "entitlement", target = "grafana_admins", subject_type = "group", subject = "homelab_admins" }
   grafana_viewers = { target_type = "entitlement", target = "grafana_viewers", subject_type = "group", subject = "homelab_users" }
   vault_admins    = { target_type = "entitlement", target = "vault_admins", subject_type = "group", subject = "homelab_admins" }
