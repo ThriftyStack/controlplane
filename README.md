@@ -7,7 +7,7 @@ bootstraps and are not general infrastructure roots.
 
 | Area | Purpose | Local validation |
 | --- | --- | --- |
-| [`authentik/`](authentik/) | Authentik groups, entitlements, and OAuth2 applications | `make -C authentik check` |
+| [`authentik/`](authentik/) | Authentik groups, entitlements, OAuth2 and proxy applications | `make -C authentik check` |
 | [`deploy/authentik/`](deploy/authentik/) | Crossplane Workspace that applies `authentik/` | `make -C deploy check` |
 
 Host runtime for Authentik (Compose, TLS, secrets wiring) lives in
@@ -20,6 +20,7 @@ day-0 stays in [`bootstrap`](https://github.com/ThriftyStack/bootstrap).
 
 [`authentik/`](authentik/) is the source of truth for the
 [ADR-0001](https://www.notion.so/400972443c708191aafbc0a9a1f7dc8a) groups
+
 (`homelab-users`, `homelab-admins`) and the Grafana, Vault, Proxmox, and MinIO OIDC
 applications. Ansible must not reconcile those objects.
 

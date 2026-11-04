@@ -46,12 +46,34 @@ oauth2_apps = {
   proxmox = {
     name   = "Proxmox"
     group  = "Infrastructure"
-    scopes = ["openid", "profile", "email"]
+    scopes = ["openid", "profile", "email", "groups"]
     redirects = [
       { matching_mode = "strict", url = "https://pve.adminio.biz:8006", redirect_uri_type = "authorization" },
     ]
     client_id     = { path = "proxmox-oidc", key = "authentik-client-id" }
     client_secret = { path = "proxmox-oidc", key = "authentik" }
+    # PVE maps this groups-claim value to group proxmox-admins-authentik.
+    entitlements = {
+      proxmox_admins = "proxmox-admins"
+    }
+  }
+}
+
+# Hosts match the legacy authentik tfvars. Longhorn has no entitlements.
+proxy_apps = {
+  longhorn = {
+    name          = "Longhorn"
+    group         = "Infrastructure"
+    external_host = "https://longhorn.oci.devoops.uk"
+    internal_host = "http://longhorn-frontend.longhorn-system.svc.cluster.local"
+  }
+}
+
+outposts = {
+  oke = {
+    name           = "oke"
+    authentik_host = "https://auth.devoops.uk"
+    providers      = ["longhorn"]
   }
   # MinIO reads the groups claim as policy names, so entitlement names must be
   # exact MinIO policy names. A user with no entitlement is refused at login.
@@ -76,6 +98,8 @@ bindings = {
   grafana         = { target_type = "oauth2_app", target = "grafana", subject_type = "group", subject = "homelab_users" }
   vault           = { target_type = "oauth2_app", target = "vault", subject_type = "group", subject = "homelab_admins" }
   proxmox         = { target_type = "oauth2_app", target = "proxmox", subject_type = "group", subject = "homelab_admins" }
+  proxmox_admins  = { target_type = "entitlement", target = "proxmox_admins", subject_type = "group", subject = "homelab_admins" }
+  longhorn        = { target_type = "proxy_app", target = "longhorn", subject_type = "group", subject = "homelab_admins" }
   grafana_admins  = { target_type = "entitlement", target = "grafana_admins", subject_type = "group", subject = "homelab_admins" }
   grafana_viewers = { target_type = "entitlement", target = "grafana_viewers", subject_type = "group", subject = "homelab_users" }
   vault_admins    = { target_type = "entitlement", target = "vault_admins", subject_type = "group", subject = "homelab_admins" }

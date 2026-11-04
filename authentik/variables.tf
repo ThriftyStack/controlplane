@@ -126,6 +126,78 @@ variable "oauth2_apps" {
   }
 }
 
+variable "proxy_apps" {
+  description = "Forward-auth or proxy applications keyed by Authentik application slug."
+  type = map(object({
+    name          = string
+    group         = string
+    external_host = string
+    internal_host = string
+    entitlements  = optional(map(string), {})
+  }))
+
+  validation {
+    condition = alltrue([for slug, app in var.proxy_apps : alltrue([
+      trimspace(slug) != "",
+      trimspace(app.name) != "",
+      trimspace(app.group) != "",
+      trimspace(app.external_host) != "",
+      trimspace(app.internal_host) != "",
+      alltrue([for key, name in app.entitlements : trimspace(key) != "" && trimspace(name) != ""]),
+    ])])
+    error_message = "Each proxy application needs a slug, name, group, external host, internal host, and non-empty entitlement names."
+  }
+
+  validation {
+    condition = length(concat(
+      flatten([for app in values(var.oauth2_apps) : keys(app.entitlements)]),
+      flatten([for app in values(var.proxy_apps) : keys(app.entitlements)]),
+      )) == length(distinct(concat(
+        flatten([for app in values(var.oauth2_apps) : keys(app.entitlements)]),
+        flatten([for app in values(var.proxy_apps) : keys(app.entitlements)]),
+    )))
+    error_message = "Entitlement keys must be unique across OAuth2 and proxy applications."
+  }
+}
+
+variable "outposts" {
+  description = "Proxy outposts keyed by configuration name. providers lists proxy_apps keys, in outpost order."
+  type = map(object({
+    name           = string
+    authentik_host = string
+    providers      = list(string)
+  }))
+
+  validation {
+    condition = alltrue([for key, outpost in var.outposts : alltrue([
+      trimspace(key) != "",
+      trimspace(outpost.name) != "",
+      trimspace(outpost.authentik_host) != "",
+      length(outpost.providers) > 0,
+      alltrue([for provider in outpost.providers : contains(keys(var.proxy_apps), provider)]),
+    ])])
+    error_message = "Each outpost needs a name, authentik_host, and at least one proxy application key."
+  }
+}
+
+variable "adoption_ids" {
+  description = "Live Authentik primary keys for objects this root adopts. proxmox_admins_entitlement is the application-entitlement pbm uuid. longhorn_provider is the proxy provider numeric pk. oke_outpost is the outpost uuid. The Longhorn application is imported by slug."
+  type = object({
+    proxmox_admins_entitlement = string
+    longhorn_provider          = string
+    oke_outpost                = string
+  })
+
+  validation {
+    condition = alltrue([
+      trimspace(var.adoption_ids.proxmox_admins_entitlement) != "",
+      trimspace(var.adoption_ids.longhorn_provider) != "",
+      trimspace(var.adoption_ids.oke_outpost) != "",
+    ])
+    error_message = "Set the live Proxmox entitlement uuid, Longhorn provider pk, and oke outpost uuid before apply."
+  }
+}
+
 variable "policies" {
   description = "Expression policies keyed by stable configuration name."
   type = map(object({
@@ -161,9 +233,16 @@ variable "bindings" {
   validation {
     condition = alltrue([for key, binding in var.bindings : alltrue([
       trimspace(key) != "",
-      contains(["oauth2_app", "entitlement"], binding.target_type),
+      contains(["oauth2_app", "proxy_app", "entitlement"], binding.target_type),
       contains(["group", "policy"], binding.subject_type),
-      binding.target_type == "oauth2_app" ? contains(keys(var.oauth2_apps), binding.target) : contains(distinct(flatten([for app in values(var.oauth2_apps) : keys(app.entitlements)])), binding.target),
+      (
+        binding.target_type == "oauth2_app" ? contains(keys(var.oauth2_apps), binding.target) :
+        binding.target_type == "proxy_app" ? contains(keys(var.proxy_apps), binding.target) :
+        contains(distinct(concat(
+          flatten([for app in values(var.oauth2_apps) : keys(app.entitlements)]),
+          flatten([for app in values(var.proxy_apps) : keys(app.entitlements)]),
+        )), binding.target)
+      ),
       binding.subject_type == "group" ? contains(keys(var.groups), binding.subject) : contains(keys(var.policies), binding.subject),
     ])])
     error_message = "Bindings require existing application or entitlement targets and existing group or policy subjects."
