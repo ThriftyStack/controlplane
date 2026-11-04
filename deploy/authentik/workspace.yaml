@@ -32,6 +32,14 @@ spec:
         value: https://vault.vault.svc:8200
       - key: authentik_url
         value: https://authentik-server.authentik.svc
+    # Egor fills the live Authentik IDs, then uncomments varmap.adoption_ids.
+    # Leave this commented. adoption_ids stays required and has no default.
+    # The empty strings below do not pass validation; they are not stand-ins.
+    # varmap:
+    #   adoption_ids:
+    #     proxmox_admins_entitlement: ""
+    #     longhorn_provider: ""
+    #     oke_outpost: ""
   writeConnectionSecretToRef:
     name: authentik-workspace
     namespace: crossplane-system

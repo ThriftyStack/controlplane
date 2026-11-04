@@ -57,6 +57,21 @@ oauth2_apps = {
       proxmox_admins = "proxmox-admins"
     }
   }
+  # MinIO reads the groups claim as policy names, so entitlement names must be
+  # exact MinIO policy names. A user with no entitlement is refused at login.
+  minio = {
+    name   = "MinIO"
+    group  = "Infrastructure"
+    scopes = ["openid", "profile", "email", "groups"]
+    redirects = [
+      { matching_mode = "strict", url = "https://minio-ui.adminio.biz:9001/oauth_callback", redirect_uri_type = "authorization" },
+    ]
+    client_id     = { path = "authentik/clients", key = "minio-client-id" }
+    client_secret = { path = "authentik/clients", key = "minio" }
+    entitlements = {
+      minio_admins = "consoleAdmin"
+    }
+  }
 }
 
 # Hosts match the legacy authentik tfvars. Longhorn has no entitlements.
@@ -74,21 +89,6 @@ outposts = {
     name           = "oke"
     authentik_host = "https://auth.devoops.uk"
     providers      = ["longhorn"]
-  }
-  # MinIO reads the groups claim as policy names, so entitlement names must be
-  # exact MinIO policy names. A user with no entitlement is refused at login.
-  minio = {
-    name   = "MinIO"
-    group  = "Infrastructure"
-    scopes = ["openid", "profile", "email", "groups"]
-    redirects = [
-      { matching_mode = "strict", url = "https://minio-ui.adminio.biz:9001/oauth_callback", redirect_uri_type = "authorization" },
-    ]
-    client_id     = { path = "authentik/clients", key = "minio-client-id" }
-    client_secret = { path = "authentik/clients", key = "minio" }
-    entitlements = {
-      minio_admins = "consoleAdmin"
-    }
   }
 }
 

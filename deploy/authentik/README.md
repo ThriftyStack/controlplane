@@ -4,6 +4,10 @@ The management cluster applies [`authentik/`](../../authentik/) through the
 Workspace in this directory. OpenTofu state stays in the GCS prefix
 `controlplane/authentik`.
 
+`adoption_ids` is required and is not set here. `workspace.yaml` has a
+commented `varmap.adoption_ids` template. The plan fails closed until those
+three live IDs replace the empty strings and the block is uncommented.
+
 ## Secrets
 
 This repository is public. Create both secrets in `crossplane-system` before
