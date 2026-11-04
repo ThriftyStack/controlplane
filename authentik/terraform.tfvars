@@ -75,6 +75,21 @@ outposts = {
     authentik_host = "https://auth.devoops.uk"
     providers      = ["longhorn"]
   }
+  # MinIO reads the groups claim as policy names, so entitlement names must be
+  # exact MinIO policy names. A user with no entitlement is refused at login.
+  minio = {
+    name   = "MinIO"
+    group  = "Infrastructure"
+    scopes = ["openid", "profile", "email", "groups"]
+    redirects = [
+      { matching_mode = "strict", url = "https://minio-ui.adminio.biz:9001/oauth_callback", redirect_uri_type = "authorization" },
+    ]
+    client_id     = { path = "authentik/clients", key = "minio-client-id" }
+    client_secret = { path = "authentik/clients", key = "minio" }
+    entitlements = {
+      minio_admins = "consoleAdmin"
+    }
+  }
 }
 
 policies = {}
@@ -88,4 +103,6 @@ bindings = {
   grafana_admins  = { target_type = "entitlement", target = "grafana_admins", subject_type = "group", subject = "homelab_admins" }
   grafana_viewers = { target_type = "entitlement", target = "grafana_viewers", subject_type = "group", subject = "homelab_users" }
   vault_admins    = { target_type = "entitlement", target = "vault_admins", subject_type = "group", subject = "homelab_admins" }
+  minio           = { target_type = "oauth2_app", target = "minio", subject_type = "group", subject = "homelab_admins" }
+  minio_admins    = { target_type = "entitlement", target = "minio_admins", subject_type = "group", subject = "homelab_admins" }
 }
