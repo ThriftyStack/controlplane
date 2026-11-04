@@ -20,7 +20,7 @@ day-0 stays in [`bootstrap`](https://github.com/ThriftyStack/bootstrap).
 
 [`authentik/`](authentik/) is the source of truth for the
 [ADR-0001](https://www.notion.so/400972443c708191aafbc0a9a1f7dc8a) groups
-(`homelab-users`, `homelab-admins`) and the Grafana, Vault, and Proxmox OIDC
+(`homelab-users`, `homelab-admins`) and the Grafana, Vault, Proxmox, and MinIO OIDC
 applications. Ansible must not reconcile those objects.
 
 ### Prerequisites
@@ -38,10 +38,18 @@ applications. Ansible must not reconcile those objects.
    ```bash
    vault kv put infra/authentik/clients \
      grafana-client-id=grafana grafana="$(openssl rand -hex 32)" \
-     vault-client-id=vault vault="$(openssl rand -hex 32)"
+     vault-client-id=vault vault="$(openssl rand -hex 32)" \
+     minio-client-id=minio minio="$(openssl rand -hex 32)"
    vault kv patch infra/proxmox-oidc \
      authentik-client-id=proxmox authentik="$(openssl rand -hex 32)"
    ```
+
+   MinIO's OIDC config is applied by the `terraform` repo's `minio/` root,
+   which reads the estate Vault (`vault.devoops.uk`), not the management
+   Vault. Copy the same secret there:
+   `vault kv patch infra/storage/minio authentik-client-secret='<minio secret>'`.
+   MinIO maps the `groups` claim straight to policy names, so the `minio`
+   entitlement names (`consoleAdmin`) must stay exact MinIO policy names.
 
 4. Create the two secrets in `crossplane-system` named by
    [`deploy/authentik/providerconfig.yaml`](deploy/authentik/providerconfig.yaml).
