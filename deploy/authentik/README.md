@@ -4,9 +4,9 @@ The management cluster applies [`authentik/`](../../authentik/) through the
 Workspace in this directory. OpenTofu state stays in the GCS prefix
 `controlplane/authentik`.
 
-`adoption_ids` is required and is not set here. `workspace.yaml` has a
-commented `varmap.adoption_ids` template. The plan fails closed until those
-three live IDs replace the empty strings and the block is uncommented.
+`adoption_ids` is not a Workspace variable. The live IDs are in
+[`authentik/terraform.tfvars`](../../authentik/terraform.tfvars), which this
+Workspace applies with the module.
 
 ## Secrets
 

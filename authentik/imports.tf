@@ -1,7 +1,7 @@
 # Application import ids are slugs. Provider pks and entitlement/outpost uuids
-# are not derivable from names; adoption_ids supplies them. An unset
-# adoption_ids fails the plan, so the Workspace cannot create or destroy the
-# live objects until those keys are filled in.
+# are not derivable from names; adoption_ids in terraform.tfvars supplies them.
+# The entitlement id is the pbm uuid, the proxy provider id is the decimal pk,
+# and the outpost id is the outpost uuid.
 
 import {
   to = module.oauth2_apps.authentik_application_entitlement.this["proxmox_admins"]

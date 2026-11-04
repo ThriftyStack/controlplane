@@ -106,3 +106,10 @@ bindings = {
   minio           = { target_type = "oauth2_app", target = "minio", subject_type = "group", subject = "homelab_admins" }
   minio_admins    = { target_type = "entitlement", target = "minio_admins", subject_type = "group", subject = "homelab_admins" }
 }
+
+# Live IDs of existing Authentik objects this root adopts.
+adoption_ids = {
+  proxmox_admins_entitlement = "857de816-5a3f-4983-a0a2-e1007957112f"
+  longhorn_provider          = "3"
+  oke_outpost                = "729e49a1-6b9f-4776-a2bf-71c4a824d69e"
+}

@@ -8,6 +8,7 @@
 *.tfstate
 *.tfstate.*
 *.tfplan
+*.plan
 .plans/
 .terraform-check/
 .terraform-plugin-cache/

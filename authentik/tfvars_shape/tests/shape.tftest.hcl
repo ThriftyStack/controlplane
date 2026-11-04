@@ -1,13 +1,6 @@
-# terraform.tfvars is loaded with the real variable types. An OAuth2 application
-# nested under outposts or proxy_apps fails decoding before these asserts.
-
-variables {
-  adoption_ids = {
-    proxmox_admins_entitlement = "test-only-not-a-live-id"
-    longhorn_provider          = "test-only-not-a-live-id"
-    oke_outpost                = "test-only-not-a-live-id"
-  }
-}
+# terraform.tfvars is loaded with the real variable types, including
+# adoption_ids. An OAuth2 application nested under outposts or proxy_apps
+# fails decoding before these asserts.
 
 run "minio_stays_an_oauth2_app" {
   command = plan
@@ -32,7 +25,11 @@ run "minio_stays_an_oauth2_app" {
       var.bindings["minio_admins"].target_type == "entitlement",
       var.bindings["minio_admins"].target == "minio_admins",
       toset(keys(var.outposts)) == toset(["oke"]),
+      var.adoption_ids.proxmox_admins_entitlement == "857de816-5a3f-4983-a0a2-e1007957112f",
+      var.adoption_ids.longhorn_provider == "3",
+      can(regex("^[0-9]+$", var.adoption_ids.longhorn_provider)),
+      var.adoption_ids.oke_outpost == "729e49a1-6b9f-4776-a2bf-71c4a824d69e",
     ])
-    error_message = "minio must be an oauth2_apps entry with entitlement minio_admins = consoleAdmin. Nesting it under outposts drops the application and its bindings."
+    error_message = "minio must stay an oauth2_apps entry with entitlement minio_admins = consoleAdmin, and adoption_ids must be the live pbm uuid, numeric proxy pk, and outpost uuid from terraform.tfvars."
   }
 }

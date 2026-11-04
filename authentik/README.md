@@ -9,14 +9,11 @@ Group names follow [ADR-0001](https://www.notion.so/400972443c708191aafbc0a9a1f7
 `proxmox-admins` from the `groups` claim. Longhorn is a proxy provider on
 outpost `oke`.
 
-`adoption_ids` is required and is not in `terraform.tfvars`. The Workspace plan
-fails until it holds the live Proxmox entitlement uuid, Longhorn provider pk,
-and `oke` outpost uuid. That failure happens before create or destroy.
-`deploy/authentik/workspace.yaml` keeps a commented `varmap.adoption_ids`
-template for those three keys. Uncomment it only after the live IDs replace
-the empty strings. Longhorn has no entitlements. Its external host is
-`https://longhorn.oci.devoops.uk`, and the `oke` outpost `authentik_host` is
-`https://auth.devoops.uk`.
+`adoption_ids` in `terraform.tfvars` holds the live Proxmox entitlement pbm
+uuid, the Longhorn proxy provider numeric pk, and the `oke` outpost uuid.
+Imports use those values for objects that already exist. Longhorn has no
+entitlements. Its external host is `https://longhorn.oci.devoops.uk`, and the
+`oke` outpost `authentik_host` is `https://auth.devoops.uk`.
 
 Auth chain: projected service account token → Vault Kubernetes auth role
 `authentik-tofu` on mount `kubernetes-management` → Vault `infra/authentik`
