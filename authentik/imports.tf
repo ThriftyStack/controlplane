@@ -11,6 +11,36 @@ import {
 }
 
 import {
+  to = module.oauth2_apps.authentik_application.this["grafana"]
+  id = "grafana"
+}
+
+import {
+  to = module.oauth2_apps.authentik_provider_oauth2.this["grafana"]
+  id = var.adoption_ids.grafana_provider
+}
+
+import {
+  to = module.oauth2_apps.authentik_application.this["proxmox"]
+  id = "proxmox"
+}
+
+import {
+  to = module.oauth2_apps.authentik_provider_oauth2.this["proxmox"]
+  id = var.adoption_ids.proxmox_provider
+}
+
+import {
+  to = module.oauth2_apps.authentik_application.this["vault"]
+  id = "vault"
+}
+
+import {
+  to = module.oauth2_apps.authentik_provider_oauth2.this["vault"]
+  id = var.adoption_ids.vault_provider
+}
+
+import {
   to = module.proxy_apps.authentik_provider_proxy.this["longhorn"]
   id = var.adoption_ids.longhorn_provider
 }

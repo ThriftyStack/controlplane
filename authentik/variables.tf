@@ -181,9 +181,12 @@ variable "outposts" {
 }
 
 variable "adoption_ids" {
-  description = "Live Authentik primary keys for objects this root adopts. proxmox_admins_entitlement is the application-entitlement pbm uuid. longhorn_provider is the proxy provider numeric pk. oke_outpost is the outpost uuid. entitlement_groups_scope is the groups scope-mapping pk (uuid). The Longhorn application is imported by slug."
+  description = "Live Authentik primary keys for objects this root adopts. proxmox_admins_entitlement is the application-entitlement pbm uuid. grafana_provider, proxmox_provider, and vault_provider are OAuth2 provider numeric pks. longhorn_provider is the proxy provider numeric pk. oke_outpost is the outpost uuid. entitlement_groups_scope is the groups scope-mapping pk (uuid). OAuth2 and Longhorn applications are imported by slug."
   type = object({
     proxmox_admins_entitlement = string
+    grafana_provider           = string
+    proxmox_provider           = string
+    vault_provider             = string
     longhorn_provider          = string
     oke_outpost                = string
     entitlement_groups_scope   = string
@@ -192,11 +195,14 @@ variable "adoption_ids" {
   validation {
     condition = alltrue([
       trimspace(var.adoption_ids.proxmox_admins_entitlement) != "",
-      trimspace(var.adoption_ids.longhorn_provider) != "",
+      can(regex("^[0-9]+$", var.adoption_ids.grafana_provider)),
+      can(regex("^[0-9]+$", var.adoption_ids.proxmox_provider)),
+      can(regex("^[0-9]+$", var.adoption_ids.vault_provider)),
+      can(regex("^[0-9]+$", var.adoption_ids.longhorn_provider)),
       trimspace(var.adoption_ids.oke_outpost) != "",
       trimspace(var.adoption_ids.entitlement_groups_scope) != "",
     ])
-    error_message = "Set the live Proxmox entitlement uuid, Longhorn provider pk, oke outpost uuid, and groups scope-mapping pk before apply."
+    error_message = "Set the live Proxmox entitlement uuid, numeric OAuth2 and Longhorn provider pks, oke outpost uuid, and groups scope-mapping pk before apply."
   }
 }
 

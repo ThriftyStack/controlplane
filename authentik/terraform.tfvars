@@ -110,6 +110,9 @@ bindings = {
 # Live IDs of existing Authentik objects this root adopts.
 adoption_ids = {
   proxmox_admins_entitlement = "857de816-5a3f-4983-a0a2-e1007957112f"
+  grafana_provider           = "6"
+  proxmox_provider           = "5"
+  vault_provider             = "4"
   longhorn_provider          = "3"
   oke_outpost                = "729e49a1-6b9f-4776-a2bf-71c4a824d69e"
   entitlement_groups_scope   = "a5ebb0c0-0c96-4105-9e50-f6d08fb0e25c"
