@@ -2,7 +2,7 @@
 
 The management cluster applies [`authentik/`](../../authentik/) through the
 Workspace in this directory. OpenTofu state stays in the GCS prefix
-`controlplane/authentik`.
+`crossplane/authentik`.
 
 `adoption_ids` is not a Workspace variable. The live IDs are in
 [`authentik/terraform.tfvars`](../../authentik/terraform.tfvars), which this
@@ -50,12 +50,12 @@ directory on the management AppProject, then add an Application.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: controlplane-authentik
+  name: crossplane-authentik
   namespace: argocd
 spec:
   project: management
   source:
-    repoURL: https://github.com/ThriftyStack/controlplane.git
+    repoURL: https://github.com/ThriftyStack/crossplane.git
     targetRevision: main
     path: deploy/authentik
     directory:

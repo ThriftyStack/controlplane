@@ -25,4 +25,4 @@ Vault `infra/authentik` key `tofu-api-token` → Authentik API.
 
 Crossplane Workspace `authentik` applies this directory. Local validation is
 `make check`. The Workspace sets `vault_addr` to `https://vault.devoops.uk`.
-State stays in the GCS prefix `controlplane/authentik`.
+State stays in the GCS prefix `crossplane/authentik`.
