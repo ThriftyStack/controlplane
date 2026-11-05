@@ -6,6 +6,9 @@
 provider "vault" {
   address = var.vault_addr
 
+  # jwt-management denies auth/token/create, so the login token is used as-is.
+  skip_child_token = true
+
   auth_login {
     path = "auth/jwt-management/login"
 

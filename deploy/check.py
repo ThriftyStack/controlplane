@@ -137,6 +137,8 @@ def assert_vault_jwt_auth(runtime):
         raise SystemExit("Vault provider must log in through jwt-management")
     if 'role = "crossplane-system_provider-opentofu"' not in providers or 'try(file("/var/run/vault-auth/token"), "")' not in providers:
         raise SystemExit("Vault JWT login parameters changed")
+    if "skip_child_token = true" not in providers:
+        raise SystemExit("Vault provider must set skip_child_token")
     if 'provider "google"' in providers or "hashicorp/google" in (ROOT / "authentik" / "versions.tf").read_text():
         raise SystemExit("google provider is unused")
 
