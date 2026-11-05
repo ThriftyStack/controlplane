@@ -29,7 +29,7 @@ spec:
         value: "true"
     vars:
       - key: vault_addr
-        value: https://vault.vault.svc:8200
+        value: https://vault.devoops.uk
       - key: authentik_url
         value: https://authentik-server.authentik.svc
   writeConnectionSecretToRef:

@@ -1,4 +1,4 @@
-# Kubernetes login reads the projected service account token at runtime.
+# JWT login reads the projected service account token at runtime.
 # OpenTofu evaluates file() during validate, which runs outside the pod, so
 # try() keeps that check hermetic. When the token is mounted, file() returns
 # it; when it is not, the login JWT is empty and Vault rejects it.
@@ -6,11 +6,14 @@
 provider "vault" {
   address = var.vault_addr
 
+  # jwt-management denies auth/token/create, so the login token is used as-is.
+  skip_child_token = true
+
   auth_login {
-    path = "auth/kubernetes-management/login"
+    path = "auth/jwt-management/login"
 
     parameters = {
-      role = "authentik-tofu"
+      role = "crossplane-system_provider-opentofu"
       jwt  = try(file("/var/run/vault-auth/token"), "")
     }
   }

@@ -33,13 +33,13 @@ spec:
                   memory: 1Gi
               env:
                 - name: VAULT_CACERT
-                  value: /etc/vault-tls/ca.crt
+                  value: /etc/vault-oke-tls/ca.crt
               volumeMounts:
                 - name: tofu-bin
                   mountPath: /usr/local/bin/tofu
                   subPath: tofu
-                - name: vault-bootstrap-ca
-                  mountPath: /etc/vault-tls
+                - name: vault-oke-ca
+                  mountPath: /etc/vault-oke-tls
                   readOnly: true
                 - name: vault-auth
                   mountPath: /var/run/vault-auth
@@ -47,16 +47,17 @@ spec:
           volumes:
             - name: tofu-bin
               emptyDir: {}
-            - name: vault-bootstrap-ca
+            # Management listener CA stays in vault-bootstrap-ca for other pods.
+            - name: vault-oke-ca
               configMap:
-                name: vault-bootstrap-ca
+                name: vault-oke-ca
                 optional: true
-            # Audience matches the management Vault role authentik-tofu.
+            # Audience vault-oke matches the jwt-management login.
             - name: vault-auth
               projected:
                 sources:
                   - serviceAccountToken:
-                      audience: vault://crossplane-system/authentik-tofu
+                      audience: vault-oke
                       expirationSeconds: 3600
                       path: token
 ---
