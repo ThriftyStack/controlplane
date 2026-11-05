@@ -19,10 +19,12 @@ The provider pod runs as service account `provider-opentofu` and logs in to
 the estate Vault at `https://vault.devoops.uk` with the projected token at
 `/var/run/vault-auth/token` (audience `vault-oke`).
 
-ConfigMap `vault-bootstrap-ca` in `crossplane-system` must contain the
-DevOops Issuing CA E1 certificate as key `ca.crt`. The pod sets
-`VAULT_CACERT=/etc/vault-tls/ca.crt`. The volume is optional. Login fails
-until that certificate is present. This repository does not contain it.
+Create ConfigMap `vault-oke-ca` in `crossplane-system` with the DevOops
+Issuing CA E1 PEM as key `ca.crt`. If E1 is an intermediate, include the
+root in that same PEM. The pod sets `VAULT_CACERT=/etc/vault-oke-tls/ca.crt`.
+The volume is optional. Login fails until that certificate is present.
+This repository does not contain it. Leave ConfigMap `vault-bootstrap-ca`
+unchanged. That object is the management Vault listener CA.
 Apply the estate Vault role `crossplane-system_provider-opentofu` on
 `jwt-management` before this Workspace can log in.
 

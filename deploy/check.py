@@ -103,6 +103,27 @@ def assert_vault_jwt_auth(runtime):
         raise SystemExit("vault-auth token path or expiration changed")
 
     container = next(item for item in pod["containers"] if item["name"] == "package-runtime")
+    env = {item["name"]: item["value"] for item in container.get("env", [])}
+    if env.get("VAULT_CACERT") != "/etc/vault-oke-tls/ca.crt":
+        raise SystemExit("VAULT_CACERT must be the estate Vault CA path")
+    ca = next((item for item in pod["volumes"] if item["name"] == "vault-oke-ca"), None)
+    if ca is None or ca.get("configMap", {}).get("name") != "vault-oke-ca":
+        raise SystemExit("vault-oke-ca volume missing")
+    if ca["configMap"].get("optional") is not True:
+        raise SystemExit("vault-oke-ca volume must stay optional")
+    if any(
+        item.get("name") == "vault-bootstrap-ca"
+        or item.get("configMap", {}).get("name") == "vault-bootstrap-ca"
+        for item in pod["volumes"]
+    ):
+        raise SystemExit("provider pod must not mount vault-bootstrap-ca")
+    ca_mount = next((item for item in container["volumeMounts"] if item["name"] == "vault-oke-ca"), None)
+    if (
+        ca_mount is None
+        or ca_mount.get("mountPath") != "/etc/vault-oke-tls"
+        or ca_mount.get("readOnly") is not True
+    ):
+        raise SystemExit("vault-oke-ca must be mounted read-only at /etc/vault-oke-tls")
     mount = next((item for item in container["volumeMounts"] if item["name"] == "vault-auth"), None)
     if (
         mount is None
