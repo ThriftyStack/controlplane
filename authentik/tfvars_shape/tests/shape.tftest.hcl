@@ -29,7 +29,8 @@ run "minio_stays_an_oauth2_app" {
       var.adoption_ids.longhorn_provider == "3",
       can(regex("^[0-9]+$", var.adoption_ids.longhorn_provider)),
       var.adoption_ids.oke_outpost == "729e49a1-6b9f-4776-a2bf-71c4a824d69e",
+      var.adoption_ids.entitlement_groups_scope == "a5ebb0c0-0c96-4105-9e50-f6d08fb0e25c",
     ])
-    error_message = "minio must stay an oauth2_apps entry with entitlement minio_admins = consoleAdmin, and adoption_ids must be the live pbm uuid, numeric proxy pk, and outpost uuid from terraform.tfvars."
+    error_message = "minio must stay an oauth2_apps entry with entitlement minio_admins = consoleAdmin, and adoption_ids must be the live pbm uuid, numeric proxy pk, outpost uuid, and groups scope-mapping pk from terraform.tfvars."
   }
 }

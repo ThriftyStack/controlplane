@@ -10,7 +10,9 @@ Group names follow [ADR-0001](https://www.notion.so/400972443c708191aafbc0a9a1f7
 outpost `oke`.
 
 `adoption_ids` in `terraform.tfvars` holds the live Proxmox entitlement pbm
-uuid, the Longhorn proxy provider numeric pk, and the `oke` outpost uuid.
+uuid, the Longhorn proxy provider numeric pk, the `oke` outpost uuid, and the
+groups scope-mapping pk for the live mapping named Homelab application
+entitlement groups.
 Imports use those values for objects that already exist. Longhorn has no
 entitlements. Its external host is `https://longhorn.oci.devoops.uk`, and the
 `oke` outpost `authentik_host` is `https://auth.devoops.uk`.

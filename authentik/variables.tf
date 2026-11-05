@@ -181,11 +181,12 @@ variable "outposts" {
 }
 
 variable "adoption_ids" {
-  description = "Live Authentik primary keys for objects this root adopts. proxmox_admins_entitlement is the application-entitlement pbm uuid. longhorn_provider is the proxy provider numeric pk. oke_outpost is the outpost uuid. The Longhorn application is imported by slug."
+  description = "Live Authentik primary keys for objects this root adopts. proxmox_admins_entitlement is the application-entitlement pbm uuid. longhorn_provider is the proxy provider numeric pk. oke_outpost is the outpost uuid. entitlement_groups_scope is the groups scope-mapping pk (uuid). The Longhorn application is imported by slug."
   type = object({
     proxmox_admins_entitlement = string
     longhorn_provider          = string
     oke_outpost                = string
+    entitlement_groups_scope   = string
   })
 
   validation {
@@ -193,8 +194,9 @@ variable "adoption_ids" {
       trimspace(var.adoption_ids.proxmox_admins_entitlement) != "",
       trimspace(var.adoption_ids.longhorn_provider) != "",
       trimspace(var.adoption_ids.oke_outpost) != "",
+      trimspace(var.adoption_ids.entitlement_groups_scope) != "",
     ])
-    error_message = "Set the live Proxmox entitlement uuid, Longhorn provider pk, and oke outpost uuid before apply."
+    error_message = "Set the live Proxmox entitlement uuid, Longhorn provider pk, oke outpost uuid, and groups scope-mapping pk before apply."
   }
 }
 
