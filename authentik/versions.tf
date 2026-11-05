@@ -17,6 +17,6 @@ terraform {
   # The Workspace GCP key supplies GOOGLE_APPLICATION_CREDENTIALS for this backend.
   backend "gcs" {
     bucket = "project-d10f7f85-317f-426a-a46-tofu-state"
-    prefix = "controlplane/authentik"
+    prefix = "crossplane/authentik"
   }
 }

@@ -1,4 +1,4 @@
-# controlplane
+# crossplane
 
 # Control plane
 
@@ -58,7 +58,7 @@ applications. Ansible must not reconcile those objects.
    from an empty file. The GCP secret is the key the Workspace uses for the
    GCS state backend.
 5. Argo CD on the management cluster sources `deploy/authentik`. The management
-   AppProject must allow `https://github.com/ThriftyStack/controlplane.git`.
+   AppProject must allow `https://github.com/ThriftyStack/crossplane.git`.
 
 ### Operate
 
@@ -70,7 +70,7 @@ make -C authentik check
 make -C deploy check
 ```
 
-State is GCS under prefix `controlplane/authentik`. OpenTofu is pinned in
+State is GCS under prefix `crossplane/authentik`. OpenTofu is pinned in
 [`.opentofu-version`](.opentofu-version). The provider image ships an older
 CLI, and [`deploy/authentik/runtime.yaml`](deploy/authentik/runtime.yaml)
 replaces it with that pin before tofu runs.

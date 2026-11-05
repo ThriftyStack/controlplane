@@ -52,7 +52,7 @@ def main():
         raise SystemExit("Workspace deletionPolicy must stay Orphan")
     if spec["managementPolicies"] != ["Observe", "Create", "Update"]:
         raise SystemExit("Workspace must not gain Delete")
-    if module["module"] != "git::https://github.com/ThriftyStack/controlplane.git?ref=main":
+    if module["module"] != "git::https://github.com/ThriftyStack/crossplane.git?ref=main":
         raise SystemExit("Workspace module source changed")
     if module["entrypoint"] != "authentik" or module["remotePullPolicy"] != "Always":
         raise SystemExit("Workspace must track authentik on main")
