@@ -1,5 +1,5 @@
 variable "vault_addr" {
-  description = "Vault address the provider logs in to. The Workspace overrides this with the in-cluster management Vault."
+  description = "Estate Vault address the provider logs in to."
   type        = string
   default     = "https://vault.devoops.uk"
 }

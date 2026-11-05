@@ -17,10 +17,10 @@ Imports use those values for objects that already exist. Longhorn has no
 entitlements. Its external host is `https://longhorn.oci.devoops.uk`, and the
 `oke` outpost `authentik_host` is `https://auth.devoops.uk`.
 
-Auth chain: projected service account token → Vault Kubernetes auth role
-`authentik-tofu` on mount `kubernetes-management` → Vault `infra/authentik`
-key `tofu-api-token` → Authentik API.
+Auth chain: projected service account token (audience `vault-oke`) → Vault
+JWT role `crossplane-system_provider-opentofu` on mount `jwt-management` →
+Vault `infra/authentik` key `tofu-api-token` → Authentik API.
 
 Crossplane Workspace `authentik` applies this directory. Local validation is
-`make check`. The Workspace sets `vault_addr` to the in-cluster management
-Vault. State stays in the GCS prefix `controlplane/authentik`.
+`make check`. The Workspace sets `vault_addr` to `https://vault.devoops.uk`.
+State stays in the GCS prefix `controlplane/authentik`.

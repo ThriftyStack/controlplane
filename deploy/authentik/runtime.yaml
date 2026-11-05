@@ -51,12 +51,12 @@ spec:
               configMap:
                 name: vault-bootstrap-ca
                 optional: true
-            # Audience matches the management Vault role authentik-tofu.
+            # Audience vault-oke matches the jwt-management login.
             - name: vault-auth
               projected:
                 sources:
                   - serviceAccountToken:
-                      audience: vault://crossplane-system/authentik-tofu
+                      audience: vault-oke
                       expirationSeconds: 3600
                       path: token
 ---

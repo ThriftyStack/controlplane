@@ -60,14 +60,14 @@ def main():
     if env.get("GOOGLE_APPLICATION_CREDENTIALS") != "gcp-credentials.json":
         raise SystemExit("GCP credentials path changed")
     vault = {item["key"]: item["value"] for item in module["vars"]}
-    if vault.get("vault_addr") != "https://vault.vault.svc:8200":
-        raise SystemExit("in-cluster Vault address changed")
+    if vault.get("vault_addr") != "https://vault.devoops.uk":
+        raise SystemExit("estate Vault address changed")
     if any("vault_token" in key or "vault-token" in str(value) for key, value in vault.items()):
         raise SystemExit("Workspace vars must not reference a static Vault token")
     if "<token>" not in example or example.startswith("https://x-access-token:@"):
         raise SystemExit("git credential example lost its placeholder")
 
-    assert_vault_kubernetes_auth(runtime)
+    assert_vault_jwt_auth(runtime)
     assert_no_static_vault_token(
         DEPLOY / "runtime.yaml",
         DEPLOY / "providerconfig.yaml",
@@ -81,7 +81,7 @@ def main():
     print("deploy checks passed")
 
 
-def assert_vault_kubernetes_auth(runtime):
+def assert_vault_jwt_auth(runtime):
     pod = runtime["spec"]["deploymentTemplate"]["spec"]["template"]["spec"]
     sa = runtime["spec"]["serviceAccountTemplate"]["metadata"]["name"]
     if sa != "provider-opentofu" or pod.get("serviceAccountName") != "provider-opentofu":
@@ -97,7 +97,7 @@ def assert_vault_kubernetes_auth(runtime):
     )
     if token is None:
         raise SystemExit("vault-auth service account token missing")
-    if token.get("audience") != "vault://crossplane-system/authentik-tofu":
+    if token.get("audience") != "vault-oke":
         raise SystemExit("vault-auth audience mismatch")
     if token.get("path") != "token" or int(token.get("expirationSeconds", 0)) != 3600:
         raise SystemExit("vault-auth token path or expiration changed")
@@ -112,10 +112,10 @@ def assert_vault_kubernetes_auth(runtime):
         raise SystemExit("vault-auth must be mounted read-only at /var/run/vault-auth")
 
     providers = (ROOT / "authentik" / "providers.tf").read_text()
-    if 'path = "auth/kubernetes-management/login"' not in providers:
-        raise SystemExit("Vault provider must log in through kubernetes-management")
-    if 'role = "authentik-tofu"' not in providers or 'try(file("/var/run/vault-auth/token"), "")' not in providers:
-        raise SystemExit("Vault Kubernetes login parameters changed")
+    if 'path = "auth/jwt-management/login"' not in providers:
+        raise SystemExit("Vault provider must log in through jwt-management")
+    if 'role = "crossplane-system_provider-opentofu"' not in providers or 'try(file("/var/run/vault-auth/token"), "")' not in providers:
+        raise SystemExit("Vault JWT login parameters changed")
     if 'provider "google"' in providers or "hashicorp/google" in (ROOT / "authentik" / "versions.tf").read_text():
         raise SystemExit("google provider is unused")
 

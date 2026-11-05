@@ -16,7 +16,15 @@ the Workspace can run. `authentik-git-credentials` is mounted as
 the state bucket `project-d10f7f85-317f-426a-a46-tofu-state`.
 
 The provider pod runs as service account `provider-opentofu` and logs in to
-the management Vault with the projected token at `/var/run/vault-auth/token`.
+the estate Vault at `https://vault.devoops.uk` with the projected token at
+`/var/run/vault-auth/token` (audience `vault-oke`).
+
+ConfigMap `vault-bootstrap-ca` in `crossplane-system` must contain the
+DevOops Issuing CA E1 certificate as key `ca.crt`. The pod sets
+`VAULT_CACERT=/etc/vault-tls/ca.crt`. The volume is optional. Login fails
+until that certificate is present. This repository does not contain it.
+Apply the estate Vault role `crossplane-system_provider-opentofu` on
+`jwt-management` before this Workspace can log in.
 
 ```sh
 touch git-credentials
