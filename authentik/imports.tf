@@ -11,6 +11,26 @@ import {
 }
 
 import {
+  to = module.oauth2_apps.authentik_application_entitlement.this["grafana_admins"]
+  id = var.adoption_ids.grafana_admins_entitlement
+}
+
+import {
+  to = module.oauth2_apps.authentik_application_entitlement.this["grafana_editors"]
+  id = var.adoption_ids.grafana_editors_entitlement
+}
+
+import {
+  to = module.oauth2_apps.authentik_application_entitlement.this["grafana_viewers"]
+  id = var.adoption_ids.grafana_viewers_entitlement
+}
+
+import {
+  to = module.oauth2_apps.authentik_application_entitlement.this["vault_admins"]
+  id = var.adoption_ids.vault_admins_entitlement
+}
+
+import {
   to = module.oauth2_apps.authentik_application.this["grafana"]
   id = "grafana"
 }
