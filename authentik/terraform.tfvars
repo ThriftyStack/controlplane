@@ -66,8 +66,8 @@ oauth2_apps = {
     redirects = [
       { matching_mode = "strict", url = "https://minio-ui.adminio.biz:9001/oauth_callback", redirect_uri_type = "authorization" },
     ]
-    client_id     = { path = "authentik/clients", key = "minio-client-id" }
-    client_secret = { path = "authentik/clients", key = "minio" }
+    client_id     = { path = "minio-oidc", key = "authentik-client-id" }
+    client_secret = { path = "minio-oidc", key = "authentik" }
     entitlements = {
       minio_admins = "consoleAdmin"
     }

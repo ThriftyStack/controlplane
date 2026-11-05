@@ -39,17 +39,16 @@ applications. Ansible must not reconcile those objects.
    ```bash
    vault kv put infra/authentik/clients \
      grafana-client-id=grafana grafana="$(openssl rand -hex 32)" \
-     vault-client-id=vault vault="$(openssl rand -hex 32)" \
-     minio-client-id=minio minio="$(openssl rand -hex 32)"
+     vault-client-id=vault vault="$(openssl rand -hex 32)"
    vault kv patch infra/proxmox-oidc \
      authentik-client-id=proxmox authentik="$(openssl rand -hex 32)"
+   vault kv patch infra/minio-oidc \
+     authentik-client-id=minio authentik="$(openssl rand -hex 32)"
    ```
 
-   MinIO's OIDC config is applied by the `terraform` repo's `minio/` root,
-   which reads the estate Vault (`vault.devoops.uk`), not the management
-   Vault. Copy the same secret there:
-   `vault kv patch infra/storage/minio authentik-client-secret='<minio secret>'`.
-   MinIO maps the `groups` claim straight to policy names, so the `minio`
+   `infra/proxmox-oidc` and `infra/minio-oidc` are each shared with the
+   `terraform` root that configures the relying party, so each side reads
+   one copy without access to other clients' secrets. MinIO maps the `groups` claim straight to policy names, so the `minio`
    entitlement names (`consoleAdmin`) must stay exact MinIO policy names.
 
 4. Create the two secrets in `crossplane-system` named by
